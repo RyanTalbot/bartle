@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/RyanTalbot/bartle/cmd"
 
 func main() {
-	fmt.Println("Bartle checking in...")
+	cmd.Execute()
 }
