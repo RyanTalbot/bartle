@@ -1,0 +1,13 @@
+style: jira
+ai:
+  enabled: {{ .AIEnabled }}
+  provider: openai
+  model: {{ .Model }}
+  api_key: {{ .APIKey }}
+  temperature: 0.2
+rules:
+  pattern: '^[A-Z]{2,}-\d+: .+$'
+  max_line_length: {{ .MaxLen }}
+hook:
+  auto_apply: {{ .AutoApply }}
+  block_on_fail: {{ .BlockOnFail }}

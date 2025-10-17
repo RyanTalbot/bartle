@@ -1,0 +1,15 @@
+style: conventional
+ai:
+  enabled: {{ .AIEnabled }}
+  provider: openai
+  model: {{ .Model }}
+  api_key: {{ .APIKey }}
+  temperature: 0.2
+rules:
+  scope_required: {{ .ScopeRequired }}
+  max_line_length: {{ .MaxLen }}
+  lowercase_start: {{ .LowercaseStart }}
+  types: [feat, fix, docs, refactor, test, chore]
+hook:
+  auto_apply: {{ .AutoApply }}
+  block_on_fail: {{ .BlockOnFail }}
