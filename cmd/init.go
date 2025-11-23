@@ -17,76 +17,79 @@ var (
 	initForce bool
 )
 
-var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize bartle for the current project",
-	Long: `Create a .bartle.yaml in the repository root with sensible defaults.
+func InitCommand() *cobra.Command {
+	var initCmd = &cobra.Command{
+		Use:   "init",
+		Short: "Initialize bartle for the current project",
+		Long: `Create a .bartle.yaml in the repository root with sensible defaults.
 Edit the file in your editor after generation.`,
-	Example: `
+		Example: `
   bartle init
   bartle init -s jira
   bartle init -s custom -f  # combine flags separately (-s jira -f)`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		// Ensure we’re inside a git repo
-		target := repoConfigPath()
-		if target == "" {
-			return fmt.Errorf("not inside a git repository (run `git init` first)")
-		}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Ensure we’re inside a git repo
+			target := repoConfigPath()
+			if target == "" {
+				return fmt.Errorf("not inside a git repository (run `git init` first)")
+			}
 
-		// Ensure dir exists, really shouldn't ever hit this.
-		if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
-			return fmt.Errorf("create config directory: %w", err)
-		}
+			// Ensure dir exists, really shouldn't ever hit this.
+			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+				return fmt.Errorf("create config directory: %w", err)
+			}
 
-		// If a file exists, stop unless --force is provided
-		if _, err := os.Stat(target); err == nil && !initForce {
-			return fmt.Errorf("%s already exists (use --force to overwrite)", target)
-		}
+			// If a file exists, stop unless --force is provided
+			if _, err := os.Stat(target); err == nil && !initForce {
+				return fmt.Errorf("%s already exists (use --force to overwrite)", target)
+			}
 
-		// TODO: We could add the creation of a backup file here if force is used.
+			// TODO: We could add the creation of a backup file here if force is used.
 
-		style := strings.ToLower(initStyle)
-		validStyles := map[string]bool{"conventional": true, "jira": true, "custom": true}
-		if !validStyles[style] {
-			return fmt.Errorf("invalid --style %q (allowed: conventional|jira|custom)", initStyle)
-		}
+			style := strings.ToLower(initStyle)
+			validStyles := map[string]bool{"conventional": true, "jira": true, "custom": true}
+			if !validStyles[style] {
+				return fmt.Errorf("invalid --style %q (allowed: conventional|jira|custom)", initStyle)
+			}
 
-		// Render the correct template with defaults
-		tmplStr := pickInitTemplate(style)
+			// Render the correct template with defaults
+			tmplStr := pickInitTemplate(style)
 
-		tpl, err := template.New("cfg").Parse(tmplStr)
-		if err != nil {
-			return fmt.Errorf("parse template: %w", err)
-		}
-		var buf bytes.Buffer
-		if err := tpl.Execute(&buf, defaultTemplateData()); err != nil {
-			return fmt.Errorf("render template: %w", err)
-		}
+			tpl, err := template.New("cfg").Parse(tmplStr)
+			if err != nil {
+				return fmt.Errorf("parse template: %w", err)
+			}
+			var buf bytes.Buffer
+			if err := tpl.Execute(&buf, defaultTemplateData()); err != nil {
+				return fmt.Errorf("render template: %w", err)
+			}
 
-		// Write the config file
-		if err := os.WriteFile(target, buf.Bytes(), 0o644); err != nil {
-			return fmt.Errorf("write config: %w", err)
-		}
+			// Write the config file
+			if err := os.WriteFile(target, buf.Bytes(), 0o644); err != nil {
+				return fmt.Errorf("write config: %w", err)
+			}
 
-		// Success message
-		fmt.Println("✅ Wrote", target)
-		fmt.Println("Tip: run `bartle install-hook` to enforce commit checks locally.")
-		fmt.Println("Next: open .bartle.yaml in your editor to customize rules.")
+			// Success message
+			fmt.Println("✅ Wrote", target)
+			fmt.Println("Tip: run `bartle install-hook` to enforce commit checks locally.")
+			fmt.Println("Next: open .bartle.yaml in your editor to customize rules.")
 
-		// TODO: Post init actions could happen here i.e. install hook, interactive mode.
+			// TODO: Post init actions could happen here i.e. install hook, interactive mode.
 
-		return nil
-	},
-}
-
-func init() {
+			return nil
+		},
+	}
 	// sensible defaults for flags
 	initStyle = "conventional"
 
 	initCmd.Flags().StringVarP(&initStyle, "style", "s", initStyle, "style: conventional|jira|custom")
 	initCmd.Flags().BoolVarP(&initForce, "force", "f", false, "overwrite existing config if it already exists")
 
-	rootCmd.AddCommand(initCmd)
+	return initCmd
+}
+
+func init() {
+	rootCmd.AddCommand(InitCommand())
 }
 
 func repoConfigPath() string {
