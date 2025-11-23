@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/RyanTalbot/bartle/internal/version"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +22,6 @@ By default, prints human-readable text:
   bartle v0.1.0 (commit abc123, built 2025-08-22T19:22:33Z, by goreleaser)
 
 Use -s for just the version number, -j for JSON, or -js for minimal JSON.`,
-
 	Example: `
   bartle version      # human-readable
   bartle version -s   # short only

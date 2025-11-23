@@ -95,10 +95,12 @@ func readStdinIfPiped() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	// If stdin is a char device, nothing was piped
 	if (info.Mode() & os.ModeCharDevice) != 0 {
 		return "", nil
 	}
+
 	var sb strings.Builder
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -111,8 +113,10 @@ func readStdinIfPiped() (string, error) {
 			return "", err
 		}
 	}
+
 	s := strings.TrimSpace(sb.String())
 	s = stripGitComments(s)
+
 	return s, nil
 }
 
